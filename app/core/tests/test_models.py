@@ -28,6 +28,15 @@ class ModelTest(TestCase):
 
     def test_new_user_invalid_email(self):
         """Test creating user with no emial raises error."""
-
         with self.assertRaises(ValueError):
             get_user_model().objects.create_user(None, 'pass123')
+
+    def test_create_new_superuser(self):
+        """Test creating a new superuser."""
+        user = get_user_model().objects.create_superuser(
+            email='some@gmail.com',
+            password='password123',
+        )
+
+        self.assertTrue(user.is_staff)
+        self.assertTrue(user.is_superuser)
