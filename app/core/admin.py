@@ -14,5 +14,8 @@ class UserAdmin(BaseUserAdmin):
         (_('Permissions'), dict(fields=('is_active', 'is_superuser', 'is_staff'))),
         (_('Dates'), dict(fields=('last_login',))),
     )
+    add_fieldsets = (
+        (None, dict(classes=('wide',), fields=('email', 'password1', 'password2'))),
+    )
 
 admin.site.register(User, UserAdmin)
