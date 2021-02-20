@@ -5,8 +5,8 @@ from rest_framework import serializers
 from rest_framework.authentication import authenticate
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """Serializer for the users object."""
+class UserCreateSerializer(serializers.ModelSerializer):
+    """Serializer for creating user object."""
 
     password1 = serializers.CharField(write_only=True, min_length=5)
     password2 = serializers.CharField(write_only=True)
@@ -17,13 +17,11 @@ class UserSerializer(serializers.ModelSerializer):
         # extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
 
     def validate(self, data):
-        password1 = data.get('password1')
-        password2 = data.get('password2')
+        password1 = data.pop('password1')
+        password2 = data.pop('password2')
         if password1 != password2:
             raise serializers.ValidationError('Passwords do not match.')
         data['password'] = password1
-        del data['password1']
-        del data['password2']
         return data
 
     def create(self, validated_data):
@@ -31,8 +29,28 @@ class UserSerializer(serializers.ModelSerializer):
         return get_user_model().objects.create_user(**validated_data)
 
 
+class UserUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for modifying user object."""
+
+    class Meta:
+        model = get_user_model()
+        fields = ('email', 'name', 'password')
+        extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
+
+    def update(self, instance, validated_data):
+        """Update a user."""
+        password = validated_data.pop('password', None)
+        user = super().update(instance, validated_data)
+
+        if password:
+            user.set_password(password)
+            user.save()
+        return user
+
+
 class AuthUserSerializer(serializers.Serializer):
     """Serializer for the user authentication object."""
+
     email = serializers.CharField()
     password = serializers.CharField(
         style={'input_type': 'password'},
