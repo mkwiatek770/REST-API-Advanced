@@ -18,4 +18,5 @@ class UserAdmin(BaseUserAdmin):
         (None, dict(classes=('wide',), fields=('email', 'password1', 'password2'))),
     )
 
+
 admin.site.register(User, UserAdmin)

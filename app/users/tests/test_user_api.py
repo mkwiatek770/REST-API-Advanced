@@ -8,6 +8,7 @@ from rest_framework.test import APIClient
 
 CREATE_USER_URL = reverse('users:create')
 
+
 def create_user(**params):
     return get_user_model().objects.create_user(**params)
 
@@ -35,7 +36,11 @@ class PublicUserApiTest(TestCase):
 
     def test_user_exists(self):
         """Test creating user that already exists fails."""
-        payload = {'email': 'some@gmail.com', 'password1': 'test1234', 'password2': 'test1234'}
+        payload = {
+            'email': 'some@gmail.com',
+            'password1': 'test1234',
+            'password2': 'test1234',
+        }
         create_user(email=payload['email'], password=payload['password1'])
 
         res = self.client.post(CREATE_USER_URL, payload)
@@ -49,13 +54,21 @@ class PublicUserApiTest(TestCase):
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(get_user_model().objects.filter(email=payload['email']).exists())
+        self.assertFalse(
+            get_user_model().objects.filter(email=payload['email']).exists()
+        )
 
     def test_passwords_dont_match(self):
         """Test user is not created if password dont match."""
-        payload = {'email': 'some@gmail.com', 'password1': 'test1234', 'password2': 'otherpass'}
+        payload = {
+            'email': 'some@gmail.com',
+            'password1': 'test1234',
+            'password2': 'otherpass',
+        }
 
         res = self.client.post(CREATE_USER_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(get_user_model().objects.filter(email=payload['email']).exists())
+        self.assertFalse(
+            get_user_model().objects.filter(email=payload['email']).exists()
+        )
