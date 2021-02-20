@@ -83,7 +83,7 @@ class PublicUserApiTest(TestCase):
 
         self.assertIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-    
+
     def test_create_token_invalid_credentials(self):
         """Test token is not created for invalid credentials,"""
         create_user(email='some@gmail.com', password='password123')
@@ -93,7 +93,7 @@ class PublicUserApiTest(TestCase):
 
         self.assertNotIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-    
+
     def test_create_token_no_user(self):
         """Test token is not returned for invalid email."""
         payload = {'email': 'notexisting@gmail.com', 'password': '12345'}
