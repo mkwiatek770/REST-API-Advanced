@@ -95,9 +95,17 @@ class PublicUserApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
     
     def test_create_token_no_user(self):
+        """Test token is not returned for invalid email."""
         payload = {'email': 'notexisting@gmail.com', 'password': '12345'}
 
         res = self.client.post(TOKEN_URL, payload)
+
+        self.assertNotIn('token', res.data)
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_token_missing_fields(self):
+        """Test that email and password are required."""
+        res = self.client.post(TOKEN_URL, {})
 
         self.assertNotIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
