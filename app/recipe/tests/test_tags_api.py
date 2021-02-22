@@ -12,7 +12,6 @@ TAGS_URL = reverse('recipe:tag-list')
 
 
 class PublicTagsApiTest(TestCase):
-    
     def setUp(self):
         self.client = APIClient()
 
@@ -24,7 +23,6 @@ class PublicTagsApiTest(TestCase):
 
 
 class PrivateTagsApiTest(TestCase):
-
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -32,11 +30,11 @@ class PrivateTagsApiTest(TestCase):
             'password123',
         )
         self.client.force_authenticate(self.user)
-    
+
     def test_retrieve_tags(self):
         """Test retrieving tags."""
-        tag1 = Tag.objects.create(name='Soy', user=self.user)
-        tag2 = Tag.objects.create(name='Vegan', user=self.user)
+        Tag.objects.create(name='Soy', user=self.user)
+        Tag.objects.create(name='Vegan', user=self.user)
         expected_tags = TagSerializer(Tag.objects.all().order_by('-name'), many=True)
 
         res = self.client.get(TAGS_URL)
@@ -46,9 +44,11 @@ class PrivateTagsApiTest(TestCase):
 
     def test_tags_limited_to_user(self):
         """Test retrieving only user's tags."""
-        tag1 = Tag.objects.create(name='Soy', user=self.user)
-        other_user = get_user_model().objects.create_user('test@gmail.com', 'password123')
-        tag2 = Tag.objects.create(name='Vegan', user=other_user)
+        Tag.objects.create(name='Soy', user=self.user)
+        other_user = get_user_model().objects.create_user(
+            'other@gmail.com', 'password123'
+        )
+        Tag.objects.create(name='Vegan', user=other_user)
         expected_tags = TagSerializer(Tag.objects.filter(user=self.user), many=True)
 
         res = self.client.get(TAGS_URL)
