@@ -162,3 +162,43 @@ class PrivateRecipesApiTest(TestCase):
         ingredients = recipe.ingredients.all()
         self.assertIn(ingredient_1, ingredients)
         self.assertIn(ingredient_2, ingredients)
+
+    def test_partial_update_recipe(self):
+        """Test HTTP PATCH is possible on existing recipe objects."""
+        recipe = Recipe.objects.create(
+            user=self.user, title='Chickenn', time_minutes=5, price=10.00
+        )
+        tag = Tag.objects.create(user=self.user, name='Tag')
+        payload = {
+            'title': 'Chicken with vegetables',
+            'tags': [tag.id],
+        }
+
+        url = get_recipe_detail_url(recipe.id)
+        res = self.client.patch(url, payload)
+
+        recipe.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(tag, recipe.tags.all())
+        self.assertEqual(recipe.title, payload['title'])
+
+    def test_full_update_recipe(self):
+        """Test HTTP PUT is possible on existing recipe objects."""
+        recipe = Recipe.objects.create(
+            user=self.user, title='Chickenn', time_minutes=5, price=10.00
+        )
+        tag = Tag.objects.create(user=self.user, name='Tag')
+        recipe.tags.add(tag)
+        payload = {
+            'title': 'Chicken with vegetables',
+            'time_minutes': 1,
+            'price': 69.00,
+        }
+
+        url = get_recipe_detail_url(recipe.id)
+        res = self.client.put(url, payload)
+
+        recipe.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertNotIn(tag, recipe.tags.all())
+        self.assertEqual(recipe.title, payload['title'])
