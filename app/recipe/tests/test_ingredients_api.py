@@ -13,10 +13,9 @@ INGREDIENTS_URL = reverse('recipe:ingredient-list')
 
 
 class PublicIngredientsApiTest(TestCase):
-
     def setUp(self):
         self.client = APIClient()
-    
+
     def test_login_required(self):
         """Make sure only authenticated user has access."""
         res = self.client.get(INGREDIENTS_URL)
@@ -25,7 +24,6 @@ class PublicIngredientsApiTest(TestCase):
 
 
 class PrivateIngredientsApiTest(TestCase):
-    
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
@@ -33,12 +31,14 @@ class PrivateIngredientsApiTest(TestCase):
             password='testpass123',
         )
         self.client.force_authenticate(self.user)
-    
+
     def test_retrieve_ingredients(self):
         """Test retrieving ingredients."""
         Ingredient.objects.create(name='Tomato', user=self.user)
         Ingredient.objects.create(name='Cucumber', user=self.user)
-        expected_ingredients = IngredientSerializer(Ingredient.objects.all().order_by('-name'), many=True)
+        expected_ingredients = IngredientSerializer(
+            Ingredient.objects.all().order_by('-name'), many=True
+        )
 
         res = self.client.get(INGREDIENTS_URL)
 
@@ -48,9 +48,13 @@ class PrivateIngredientsApiTest(TestCase):
     def test_ingredients_limited_to_user(self):
         """Test retrieving only user's ingredients."""
         Ingredient.objects.create(name='Potato', user=self.user)
-        other_user = get_user_model().objects.create_user('other@gmail.com', 'password123')
+        other_user = get_user_model().objects.create_user(
+            'other@gmail.com', 'password123'
+        )
         Ingredient.objects.create(name='Salad', user=other_user)
-        expected_ingredients = IngredientSerializer(Ingredient.objects.filter(user=self.user), many=True)
+        expected_ingredients = IngredientSerializer(
+            Ingredient.objects.filter(user=self.user), many=True
+        )
 
         res = self.client.get(INGREDIENTS_URL)
 
