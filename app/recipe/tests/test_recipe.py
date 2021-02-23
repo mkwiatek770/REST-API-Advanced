@@ -115,3 +115,50 @@ class PrivateRecipesApiTest(TestCase):
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_recipe_create_success(self):
+        """Test creating a new recipe."""
+        payload = {'title': 'New Recipe', 'time_minutes': 5, 'price': 3.33}
+
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(Recipe.objects.filter(title=payload['title']).exists())
+
+    def test_recipe_with_tags_create_success(self):
+        """Test creating a new recipe with tags."""
+        tag_1 = Tag.objects.create(user=self.user, name='tag 1')
+        tag_2 = Tag.objects.create(user=self.user, name='tag 2')
+        payload = {
+            'title': 'New Recipe',
+            'time_minutes': 5,
+            'price': 3.33,
+            'tags': [tag_1.id, tag_2.id],
+        }
+
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(title=payload['title'])
+        tags = recipe.tags.all()
+        self.assertIn(tag_1, tags)
+        self.assertIn(tag_2, tags)
+
+    def test_recipe_with_ingredients_create_success(self):
+        """Test creating a new recipe with ingredients."""
+        ingredient_1 = Ingredient.objects.create(user=self.user, name='Ingredient 1')
+        ingredient_2 = Ingredient.objects.create(user=self.user, name='Ingredient 2')
+        payload = {
+            'title': 'New Recipe',
+            'time_minutes': 5,
+            'price': 3.33,
+            'ingredients': [ingredient_1.id, ingredient_2.id],
+        }
+
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(title=payload['title'])
+        ingredients = recipe.ingredients.all()
+        self.assertIn(ingredient_1, ingredients)
+        self.assertIn(ingredient_2, ingredients)
