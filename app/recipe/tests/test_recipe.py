@@ -6,9 +6,13 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import Recipe, Ingredient, Tag
-from recipe.serializers import RecipeSerializer
+from recipe.serializers import RecipeSerializer, RecipeDetailSerializer
 
 RECIPES_URL = reverse('recipe:recipe-list')
+
+
+def get_recipe_detail_url(pk: int):
+    return reverse('recipe:recipe-detail', args=[pk])
 
 
 class PublicRecipesApiTest(TestCase):
@@ -51,7 +55,7 @@ class PrivateRecipesApiTest(TestCase):
             title='Recipe 2', user=self.user, time_minutes=3, price=12.50
         )
         expected_recipes = RecipeSerializer(
-            Recipe.objects.all().order_by('-title'), many=True
+            Recipe.objects.all().order_by('-id'), many=True
         )
 
         res = self.client.get(RECIPES_URL)
@@ -78,3 +82,36 @@ class PrivateRecipesApiTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, expected_recipes.data)
+
+    def test_recipe_detail(self):
+        """Test retrieving recipe detail data."""
+        recipe = Recipe.objects.create(
+            title='Recipe 1', user=self.user, time_minutes=6, price=4.00
+        )
+        tag = Tag.objects.create(user=self.user, name='Tag 1')
+        ingredient = Ingredient.objects.create(user=self.user, name='Ingredient 1')
+        recipe.tags.add(tag)
+        recipe.ingredients.add(ingredient)
+        serializer = RecipeDetailSerializer(recipe)
+
+        url = get_recipe_detail_url(recipe.id)
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+        self.assertEqual(res.data['tags'][0]['name'], tag.name)
+        self.assertEqual(res.data['ingredients'][0]['name'], ingredient.name)
+
+    def test_recipe_detail_of_other_user(self):
+        """Make user user can retrieve his own recipe detail views."""
+        other_user = get_user_model().objects.create_user(
+            'other@gmail.com', 'password123'
+        )
+        recipe = Recipe.objects.create(
+            title='Recipe 1', user=other_user, time_minutes=6, price=4.00
+        )
+
+        url = get_recipe_detail_url(recipe.id)
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
