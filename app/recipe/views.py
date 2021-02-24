@@ -1,3 +1,5 @@
+from typing import List
+
 from rest_framework import viewsets, mixins
 from rest_framework import status
 from rest_framework.response import Response
@@ -43,11 +45,25 @@ class IngredientViewSet(BaseViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticated,)
+    queryset = Recipe.objects.all()
     authentication_classes = (TokenAuthentication,)
 
     def get_queryset(self):
         """Return objects for the current authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredients')
+        queryset = self.queryset.filter(user=self.request.user).order_by('-id')
+        if tags:
+            tag_ids = self._params_to_ints(tags)
+            queryset = queryset.filter(tags__id__in=tag_ids)
+        if ingredients:
+            ingredients_ids = self._params_to_ints(ingredients)
+            queryset = queryset.filter(ingredients__id__in=ingredients_ids)
+        return queryset
+
+    def _params_to_ints(self, qs) -> List[int]:
+        """Convert a list of string IDs to a list of integers."""
+        return [int(num) for num in qs.split(',')]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
