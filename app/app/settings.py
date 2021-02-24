@@ -112,10 +112,12 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.1/howto/static-files/
-
+# Static files (CSS, JavaScript, Images) & Media files
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
+STATIC_ROOL = '/vol/web/static'
+MEDIA_ROOL = '/vol/web/media'
 
 # Custom user model
 AUTH_USER_MODEL = 'core.User'
