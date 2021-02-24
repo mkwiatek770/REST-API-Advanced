@@ -249,9 +249,15 @@ class RecipeImageUploadTests(TestCase):
 
     def test_filter_tags_success(self):
         """Test filtering recipes by tags."""
-        recipe_1 = Recipe.objects.create(user=self.user, title='Dish 1', time_minutes=1, price=1.11)
-        recipe_2 = Recipe.objects.create(user=self.user, title='Dish 2', time_minutes=2, price=2.22)
-        recipe_3 = Recipe.objects.create(user=self.user, title='Dish 3', time_minutes=3, price=3.33)
+        recipe_1 = Recipe.objects.create(
+            user=self.user, title='Dish 1', time_minutes=1, price=1.11
+        )
+        recipe_2 = Recipe.objects.create(
+            user=self.user, title='Dish 2', time_minutes=2, price=2.22
+        )
+        recipe_3 = Recipe.objects.create(
+            user=self.user, title='Dish 3', time_minutes=3, price=3.33
+        )
         tag_1 = Tag.objects.create(user=self.user, name='Tag 1')
         tag_2 = Tag.objects.create(user=self.user, name='Tag 2')
         recipe_1.tags.add(tag_1)
@@ -265,15 +271,23 @@ class RecipeImageUploadTests(TestCase):
 
     def test_filter_ingredients_success(self):
         """Test filtering ingredients by tags."""
-        recipe_1 = Recipe.objects.create(user=self.user, title='Dish 1', time_minutes=1, price=1.11)
-        recipe_2 = Recipe.objects.create(user=self.user, title='Dish 2', time_minutes=2, price=2.22)
-        recipe_3 = Recipe.objects.create(user=self.user, title='Dish 3', time_minutes=3, price=3.33)
+        recipe_1 = Recipe.objects.create(
+            user=self.user, title='Dish 1', time_minutes=1, price=1.11
+        )
+        recipe_2 = Recipe.objects.create(
+            user=self.user, title='Dish 2', time_minutes=2, price=2.22
+        )
+        recipe_3 = Recipe.objects.create(
+            user=self.user, title='Dish 3', time_minutes=3, price=3.33
+        )
         ingredient_1 = Ingredient.objects.create(user=self.user, name='ingredient 1')
         ingredient_2 = Ingredient.objects.create(user=self.user, name='ingredient 2')
         recipe_1.ingredients.add(ingredient_1)
         recipe_2.ingredients.add(ingredient_2)
 
-        res = self.client.get(RECIPES_URL, {'ingredients': f'{ingredient_1.id},{ingredient_2.id}'})
+        res = self.client.get(
+            RECIPES_URL, {'ingredients': f'{ingredient_1.id},{ingredient_2.id}'}
+        )
 
         self.assertIn(RecipeSerializer(recipe_1).data, res.data)
         self.assertIn(RecipeSerializer(recipe_2).data, res.data)

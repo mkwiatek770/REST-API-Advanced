@@ -5,7 +5,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Ingredient
+from core.models import Ingredient, Recipe
 from recipe.serializers import IngredientSerializer
 
 
@@ -78,3 +78,20 @@ class PrivateIngredientsApiTest(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Ingredient.objects.count(), 0)
+
+    def test_retrieve_ingredients_assigned_to_recipe(self):
+        """Test retrieving only those ingredients that are assigned by recipe."""
+        ingredient_1 = Ingredient.objects.create(user=self.user, name='Ingredient 1')
+        ingredient_2 = Ingredient.objects.create(user=self.user, name='Ingredient 2')
+        recipe = Recipe.objects.create(
+            user=self.user,
+            title='Some title',
+            price=10.0,
+            time_minutes=1,
+        )
+        recipe.ingredients.add(ingredient_1)
+
+        res = self.client.get(INGREDIENTS_URL, {'assigned_only': 1})
+
+        self.assertIn(IngredientSerializer(ingredient_1).data, res.data)
+        self.assertNotIn(IngredientSerializer(ingredient_2).data, res.data)
