@@ -84,5 +84,5 @@ class ModelTest(TestCase):
         expected_path = f'uploads/recipe/{uuid}.jpg'
 
         file_path = models.recipe_image_file_path(None, 'myimage.jpg')
-        
+
         self.assertEqual(file_path, expected_path)

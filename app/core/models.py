@@ -12,6 +12,7 @@ from django.conf import settings
 
 RECIPE_PATH = 'uploads/recipe/'
 
+
 def recipe_image_file_path(instance, filename) -> str:
     """Generate file path for new image."""
     ext = filename.split('.')[-1]
