@@ -42,6 +42,6 @@ jobs:
       - name: Check Syntax # check code formatting
         run: flake8 app/
       - name: Run Migrations # run migrations to create table in side car db container
-        run: python manage.py migrate
+        run: python app/manage.py migrate
       - name: Run Test # running tests
-        run: python manage.py test
+        run: python app/manage.py test
