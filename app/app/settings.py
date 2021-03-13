@@ -67,11 +67,11 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-if os.getenv('WORKFLOW'):
+if os.getenv('GITHUB_WORKFLOW'):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'github-actions',
+            'NAME': 'github_actions',
             'USER': 'postgres',
             'PASSWORD': 'postgres',
             'HOST': 'localhost',
