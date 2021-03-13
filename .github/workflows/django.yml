@@ -28,8 +28,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run migrations
-      run: python manage.py migrate
+      run: python app/manage.py migrate
     - name: Run tests
-      run: python manage.py test
+      run: python app/manage.py test
     - name: Flake 8
       run: flake8 app/
