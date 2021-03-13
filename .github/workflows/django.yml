@@ -1,47 +1,35 @@
-# name of our workflow
-name: Django CI/CD Workflow
+name: Django app
 
-# triggers for our workflow
-on:
-  push:
-    branches: [ main ]
-
+on: [ push ]
 
 jobs:
-  health-check-job: # health check job for testing and code formatting check
-    runs-on: ubuntu-latest # os for running the job
+  build:
+    runs-on: ubuntu-latest
     services:
-      postgres: # we need a postgres docker image to be booted a side car service to run the tests that needs a db
-        image: postgres
-        env: # the environment variable must match with app/settings.py if block of DATBASES variable otherwise test will fail due to connectivity issue.
+      postgres:
+        image: postgres:10.8
+        env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: github-actions
+          POSTGRES_DB: github_actions
         ports:
-          - 5432:5432 # exposing 5432 port for application to use
-        # needed because the postgres container does not provide a healthcheck
+          - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-    steps:
-      - name: Checkout code # checking our the code at current commit that triggers the workflow
-        uses: actions/checkout@v2
-      - name: Cache dependency # caching dependency will make our build faster.
-        uses: actions/cache@v2 # for more info checkout pip section documentation at https://github.com/actions/cache
+      steps:
+      - uses: actions/checkout@v1
+      - name: Set up python3.8
+        uses: actions/setup-python@v1
         with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      - name: Setup python environment # setting python environment to 3.x
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x' # if you want multiple python version run just use matrix strategy in job config. See the documentation of GitHub Actions
-      - name: Check Python version # checking the python version to see if 3.x is installed.
-        run: python --version
-      - name: Install requirements # install application requirements
-        run: pip install -r requirements.txt
-      - name: Check Syntax # check code formatting
+          python-version: 3.8
+      - name: psycopg2 prerequisites
+        run: sudo apt-get install python-dev libpq-dev
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run migrations
+        run: python manage.py migrate
+      - name: Run tests
+        run: python manage.py test
+      - name: Flake 8
         run: flake8 app/
-      - name: Run Migrations # run migrations to create table in side car db container
-        run: python app/manage.py migrate
-      - name: Run Test # running tests
-        run: python app/manage.py test
